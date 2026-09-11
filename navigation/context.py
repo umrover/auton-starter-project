@@ -10,7 +10,7 @@ from rclpy.subscription import Subscription
 from rclpy.node import Node
 import tf2_ros
 from geometry_msgs.msg import Twist
-from mrover.msg import StarterProjectTag
+from msg import StarterProjectTag
 
 import sys
 import os
