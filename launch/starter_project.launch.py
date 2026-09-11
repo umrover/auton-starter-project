@@ -61,6 +61,11 @@ def generate_launch_description() -> LaunchDescription:
                 condition=IfCondition(rviz),
                 output="screen",
             ),
+            Node(
+                package="mrover",
+                executable="arm_controller",
+                name="arm_controller",
+            )
         ],
     )
 

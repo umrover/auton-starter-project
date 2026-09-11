@@ -58,11 +58,13 @@ class Navigation(Node):
 
         self.create_timer(1 / 60, self.state_machine.update)
 
+
 def main():
     try:
-        # TODO: init a node called "navigation"
+        # TODO: initialize a node
         rclpy.init()
-        # context and navigation objects
+
+        # Context and Navigation objects
         context = Context()
         navigation = Navigation(context)
         context.setup(navigation)
@@ -73,6 +75,7 @@ def main():
         pass
     except ExternalShutdownException:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
