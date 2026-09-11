@@ -29,12 +29,8 @@ namespace mrover {
         // Create subscribers for GPS and IMU data, linking them to our callback functions
 		// Every time another node publishes to the /gps or /imu topics, it should call the respective callback
 		// TODO
-        gpsSubscriber = create_subscription<sensor_msgs::msg::NavSatFix>("/gps", 1, [this](sensor_msgs::msg::NavSatFix::ConstSharedPtr const& msg) {
-            gpsCallback(msg);
-        });
-		imuSubscriber = create_subscription<sensor_msgs::msg::Imu>("/imu", 1, [this](sensor_msgs::msg::Imu::ConstSharedPtr const& msg) {
-            imuCallback(msg);
-        });
+        // gpsSubscriber = ;
+		// imuSubscriber = ;
 
         // Create a publisher for our tag topic
         // See: http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28c%2B%2B%29
@@ -47,8 +43,7 @@ namespace mrover {
         // convert it to cartesian coordinates, store that value in `self.pose`, then publish
         // that pose to the TF tree.
 		// TODO
-		pose.position = R3d(sphericalToCartesian({gps_msg.latitude, gps_msg.longitude}));
-		posePublisher->publish(pose);
+        
 
     }
 
@@ -56,8 +51,6 @@ namespace mrover {
         // reads the orientation data from the given Imu message,
         // store that value in `self.pose`, then publish that pose to the TF tree.
 		// TODO
-		pose.orientation = SO3(imu_msg.orientation);
-		posePublisher->publish(pose);
 
     }
 
