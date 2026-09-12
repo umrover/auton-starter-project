@@ -14,7 +14,7 @@ class DriveState(State):
         pass
 
     def on_loop(self, context) -> State:
-        target = np.array([8.0, 2.0, 0.0])
+        target = np.array([7.0, 5.0, 0.0])
 
         # TODO: get the rover's pose, if it doesn't exist stay in DriveState (return self)
         SE3_pose = context.rover.get_pose()

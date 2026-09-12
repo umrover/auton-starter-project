@@ -18,12 +18,6 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <mrover_autonomy_starter/msg/starter_project_tag.hpp>
 
-// #if __has_include(<mrover_autonomy_starter/msg/starter_project_tag.hpp>)
-// #include <mrover/StarterProjectTag.h>
-// #else
-// struct StarterProjectTag {};
-// #endif
-
 namespace mrover_autonomy_starter {
 
     /**
@@ -57,9 +51,8 @@ namespace mrover_autonomy_starter {
          *  Given an image, detect ArUco tags, and fill a vector full of output messages.
          *
          * @param image Image
-         * @param tags  Output vector of tags
          */
-        void findTagsInImage(cv::Mat const& image, std::vector<msg::StarterProjectTag>& tags);
+        void findTagsInImage(cv::Mat const& image);
 
         /**
          * Publish our processed tag
@@ -91,7 +84,7 @@ namespace mrover_autonomy_starter {
          * @param tags          Vector of tags
          * @return              Center tag
          */
-        [[nodiscard]] auto selectTag(cv::Mat const& image, std::vector<msg::StarterProjectTag> const& tags) -> msg::StarterProjectTag;
+        [[nodiscard]] auto selectTag(std::vector<msg::StarterProjectTag> const& tags) -> msg::StarterProjectTag;
     };
 
 } // namespace mrover_autonomy_starter

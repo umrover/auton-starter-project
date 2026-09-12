@@ -39,6 +39,7 @@ namespace mrover_autonomy_starter {
         // TODO: uncomment me!
         mTagPublisher = create_publisher<msg::StarterProjectTag>("tag", 1);
 
+        // In order for future calls to cv::aruco::detectMarkers to work, we must first get the ArUco dictionary for 4x4 tags with ids from 0-49.
         mTagDictionary = cv::makePtr<cv::aruco::Dictionary>(cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50));
     }
 
@@ -52,71 +53,65 @@ namespace mrover_autonomy_starter {
 
         cv::cvtColor(imageBGRA, image, cv::COLOR_BGRA2BGR);
 
-        // TODO: implement me!
-        // hint: think about the order in which these functions were implemented ;)
-        // Detect tags in the image pixels
-        findTagsInImage(image, mTags);
-        // Select the tag that is closest to the middle of the screen
-        msg::StarterProjectTag tag = selectTag(image, mTags);
-        // Publish the message to our topic so navigation or others can receive it
-        publishTag(tag);
+        // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
+        // find tags in image
+        findTagsInImage(image);
+        
+        // call publishTag
+        publishTag(selectTag(mTags));
     }
 
-    auto Perception::findTagsInImage(cv::Mat const& image, std::vector<msg::StarterProjectTag>& tags) -> void { // NOLINT(*-convert-member-functions-to-static)
+    auto Perception::findTagsInImage(cv::Mat const& image) -> void { // NOLINT(*-convert-member-functions-to-static)
         // hint: take a look at OpenCV's documentation for the detectMarkers function
         // hint: you have mTagDictionary, mTagCorners, and mTagIds member variables already defined! (look in perception.hpp)
         // hint: write and use the "getCenterFromTagCorners" and "getClosenessMetricFromTagCorners" functions
 
-        tags.clear(); // Clear old tags in output vector
+        mTags.clear(); // Clear old tags in output vector
 
-        // TODO: implement me!
+        // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
+        
+        // populate mTagCorners and mTagIds
         cv::aruco::detectMarkers(image, mTagDictionary, mTagCorners, mTagIds);
-        for (size_t i = 0; i < mTagIds.size(); ++i) {
-            // For each tag detected, in the image, create a new StarterProjectTag and add it to the mTags vector
-            msg::StarterProjectTag tag;
-            tag.tag_id = mTagIds[i];
-            std::pair<float, float> center = getCenterFromTagCorners(mTagCorners[i]);
-            // Express each tag center to be relative to the center of the image
-            // This is to make calculating the center tag in selectTag possible and it makes navigation easier down the line
-            // Ask an auton lead if you have questions about this!
-            // std::cout << center.first << " " << center.second << std::endl;
-            tag.x_tag_center_pixel = (center.first - float(image.cols) / 2) / float(image.cols);
-            tag.y_tag_center_pixel = (center.second - float(image.rows) / 2) / float(image.rows);
-            tag.closeness_metric = getClosenessMetricFromTagCorners(image, mTagCorners[i]);
-            mTags.push_back(tag);
+        for (uint i = 0; i < mTagIds.size(); i++){
+            int tagId = mTagIds[i];
+            auto tagCenter = getCenterFromTagCorners(mTagCorners[i]);
+            auto closenessMetric = getClosenessMetricFromTagCorners(image, mTagCorners[i]);
+
+            msg::StarterProjectTag tagMsg;
+            tagMsg.tag_id = tagId;
+            tagMsg.x_tag_center_pixel = tagCenter.first;
+            tagMsg.y_tag_center_pixel = tagCenter.second;
+            tagMsg.closeness_metric = closenessMetric;
+            mTags.push_back(tagMsg);
         }
     }
 
-    auto Perception::selectTag(cv::Mat const& image, std::vector<msg::StarterProjectTag> const& tags) -> msg::StarterProjectTag { // NOLINT(*-convert-member-functions-to-static)
-        // TODO: implement me!
-        if (!tags.empty()) {
-            if (tags.size() == 1) {
-                // If only one tag is seen, return it
-                return tags[0];
-            }
-            int minTagIndex = 0;
-            double minTagDist = sqrt(pow(tags[0].x_tag_center_pixel, 2) + pow(tags[0].y_tag_center_pixel, 2));
-            // For each tag seen, if its distance to the origin is less than that of the previous tags, it is now the selected tag
-            for (int i = 1; i < tags.size(); ++i) {
-                double currentTagDist = sqrt(pow(tags[i].x_tag_center_pixel, 2) + pow(tags[i].y_tag_center_pixel, 2));
-                if (currentTagDist < minTagDist) {
-                    minTagDist = currentTagDist;
-                    minTagIndex = i;
-                }
-            }
-            return tags[minTagIndex];
+    auto Perception::selectTag(std::vector<msg::StarterProjectTag> const& tags) -> msg::StarterProjectTag { // NOLINT(*-convert-member-functions-to-static)
+        // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
+        // If there isn't a valid tag, you should return a "dummy" tag with ID -1.
+        if(tags.empty()){
+            msg::StarterProjectTag noTag;
+            noTag.tag_id = -1;
+            return noTag;
+        }  
 
-        } else {
-            // If no tag is seen, return a tag with a false (-1) indicator
-            msg::StarterProjectTag tag;
-            tag.tag_id = -1;
-            return tag;
+        auto minSeen = tags[0].closeness_metric;
+        auto closest = tags[0];
+
+        for(uint i = 1; i < tags.size(); i++){
+            if(tags[i].closeness_metric < minSeen){
+                closest = tags[i];
+                minSeen = tags[i].closeness_metric;
+            }
         }
+
+        return closest;
     }
 
     auto Perception::publishTag(msg::StarterProjectTag const& tag) -> void {
-        // TODO: implement me!
+        // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
         mTagPublisher->publish(tag);
+
     }
 
     auto Perception::getClosenessMetricFromTagCorners(cv::Mat const& image, std::vector<cv::Point2f> const& tagCorners) -> float { // NOLINT(*-convert-member-functions-to-static)
@@ -124,40 +119,32 @@ namespace mrover_autonomy_starter {
         // hint: this is an approximation that will be used later by navigation to stop "close enough" to a tag.
         // hint: try not overthink, this metric does not have to be perfectly accurate, just correlated to distance away from a tag
 
-        // TODO: implement me!
+        // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
+        // find the area of the tag, and divide by the total area of the image
+        // tagCorners 0: top left, 1: top right, 2: bottom right, 3: bottom left
+        auto imageHeight = image.rows;
+        auto imageWidth = image.cols;
 
-        // Side length (Not perfect because it may not be parrallel with the image plane)
+        auto imageArea = imageHeight * imageWidth;
+        
+        auto topWidth = std::abs(tagCorners[0].x-tagCorners[1].x);
+        auto bottomWidth = std::abs(tagCorners[2].x-tagCorners[3].x);
+        auto avgWidth = (topWidth + bottomWidth)/2;
+        
+        auto leftHeight = std::abs(tagCorners[0].y-tagCorners[3].y);
+        auto rightHeight = std::abs(tagCorners[1].y-tagCorners[2].y);
+        auto avgHeight = (leftHeight+rightHeight)/2;
 
-        // This works because the ordering os clockwise
-        // Find three of the corners to calculate the area of the tag from
-        // We are assuming the tag is a square
-        float imageSize = float(image.cols) * float(image.rows);
-        cv::Point2f topLeft = tagCorners[0];
-        cv::Point2f topRight = tagCorners[1];
-        cv::Point2f bottomLeft = tagCorners[2];
+        auto avgArea = avgWidth*avgHeight;
 
-        // Calculate the area of the tag
-        float tagWidth = topRight.x - topLeft.x;
-        float tagHeight = bottomLeft.y - topLeft.y;
-
-        // Metric is the ratio between the tag area and total image area
-        float metric = abs(tagWidth * tagHeight) / imageSize;
-        // Metric goes from 0 to 1 where 0 means really close and 1 means really far
-        // When the tag is really close, it takes up a lot of area on the screen and the ratio is closer to 1, the inverse of what we want
-        // Thus we must return 1 - metric
-        return 1 - metric;
+        return (1-std::sqrt(avgArea/static_cast<float>(imageArea)));
     }
 
     auto Perception::getCenterFromTagCorners(std::vector<cv::Point2f> const& tagCorners) -> std::pair<float, float> { // NOLINT(*-convert-member-functions-to-static)
-        // TODO: implement me!
-        float xSum = 0;
-        float ySum = 0;
-        // The center is the sum of the x and y coordinates of the corners
-        for (auto& corner: tagCorners) {
-            xSum += corner.x;
-            ySum += corner.y;
-        }
-        std::pair<float, float> center(xSum / 4.0, ySum / 4.0);
+        // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
+        std::pair<float,float> center;
+        center.first = (tagCorners[0].x + tagCorners[1].x + tagCorners[2].x + tagCorners[3].x)/static_cast<float>(4.0);
+        center.second = (tagCorners[0].y + tagCorners[1].y + tagCorners[2].y + tagCorners[3].y)/static_cast<float>(4.0);
         return center;
     }
 
