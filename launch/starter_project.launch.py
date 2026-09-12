@@ -8,7 +8,6 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-
 def generate_launch_description() -> LaunchDescription:
     mrover_share = Path(get_package_share_directory("mrover"))
 
@@ -61,6 +60,11 @@ def generate_launch_description() -> LaunchDescription:
                 condition=IfCondition(rviz),
                 output="screen",
             ),
+            Node(
+                package="mrover",
+                executable="arm_controller",
+                name="arm_controller",
+            )
         ],
     )
 

@@ -1,5 +1,5 @@
 # MRover autonomy starter project
-export AUTON_STARTER_PATH="${AUTON_STARTER_PATH:-$HOME/ros2-autonomy-starter-projects}"
+export AUTON_STARTER_PATH="${AUTON_STARTER_PATH:-$HOME/auton-starter-project}"
 
 source_auton_starter_overlay() {
     if ! typeset -f source_mrover_overlay > /dev/null; then

@@ -16,9 +16,9 @@ readonly WHITE_BOLD='\033[1;37m'
 readonly WHITE='\033[0;37m'
 readonly NC='\033[0m'
 
-readonly REPO_URL="git@github.com:umrover/ros2-autonomy-starter-projects.git"
+readonly REPO_URL="git@github.com:umrover/auton-starter-project.git"
 readonly REPO_BRANCH="main"
-readonly DEFAULT_INSTALL_PATH="$HOME/ros2-autonomy-starter-projects"
+readonly DEFAULT_INSTALL_PATH="$HOME/auton-starter-project"
 readonly WIKI_URL="https://github.com/umrover/mrover-ros2/wiki/2.-Install-ROS"
 
 on_err() {
@@ -42,7 +42,7 @@ fi
 # the script is invoked as `curl ... | bash`. No tty means take the default.
 HAVE_TTY=true
 # shellcheck disable=SC2217  # intentional: only checking that /dev/tty can be opened
-if ! { true < /dev/tty; } 2> /dev/null; then
+if ! { true </dev/tty; } 2>/dev/null; then
     HAVE_TTY=false
 fi
 
@@ -70,7 +70,7 @@ if [[ ! -f "${MROVER_PATH}/package.xml" ]]; then
 fi
 echo -e "${GREEN_BOLD}[ok] mrover repo present${NC}"
 
-if ! zsh -ic 'type source_mrover_overlay' > /dev/null 2>&1; then
+if ! zsh -ic 'type source_mrover_overlay' >/dev/null 2>&1; then
     fail "source_mrover_overlay is not defined in your shell." "" \
         "Finish the mrover shell setup, then reboot: ${WIKI_URL}"
 fi
@@ -101,12 +101,12 @@ echo -e "${BLUE_BOLD}Preflight passed.${NC}"
 # Step 1: place this repo
 # ---------------------------------------------------------------------------
 
-echo -e "${BLUE_BOLD}== Placing ros2-autonomy-starter-projects ==${NC}"
+echo -e "${BLUE_BOLD}== Placing Autonomy Starter Project ==${NC}"
 
 INSTALL_PATH="${OPT_PATH}"
 if [[ -z "${INSTALL_PATH}" && "${HAVE_TTY}" == true ]]; then
-    echo -e -n "Install path [${DEFAULT_INSTALL_PATH}]: " > /dev/tty
-    read -r INSTALL_PATH < /dev/tty || INSTALL_PATH=""
+    echo -e -n "Install path [${DEFAULT_INSTALL_PATH}]: " >/dev/tty
+    read -r INSTALL_PATH </dev/tty || INSTALL_PATH=""
 fi
 if [[ -z "${INSTALL_PATH}" ]]; then
     INSTALL_PATH="${DEFAULT_INSTALL_PATH}"
@@ -120,8 +120,8 @@ fi
 readonly INSTALL_PATH
 
 if [[ -e "${INSTALL_PATH}" ]]; then
-    if [[ -f "${INSTALL_PATH}/package.xml" ]] \
-        && grep -q "<name>mrover_autonomy_starter</name>" "${INSTALL_PATH}/package.xml" 2> /dev/null; then
+    if [[ -f "${INSTALL_PATH}/package.xml" ]] &&
+        grep -q "<name>mrover_autonomy_starter</name>" "${INSTALL_PATH}/package.xml" 2>/dev/null; then
         echo -e "${GREEN_BOLD}${INSTALL_PATH} already holds this repo. Reusing it.${NC}"
     else
         fail "${INSTALL_PATH} exists and does not hold this repo. Aborting."
@@ -141,7 +141,7 @@ readonly CUSTOM_FILE="${CUSTOM_DIR}/auton-starter.zsh"
 
 if [[ -d "$HOME/.oh-my-zsh" ]]; then
     mkdir -p "${CUSTOM_DIR}"
-    cat > "${CUSTOM_FILE}" <<EOF
+    cat >"${CUSTOM_FILE}" <<EOF
 export AUTON_STARTER_PATH="${INSTALL_PATH}"
 source "\$AUTON_STARTER_PATH/scripts/auton_starter.zsh"
 EOF
