@@ -28,22 +28,22 @@ namespace mrover_autonomy_starter {
      */
     class Perception : public rclcpp::Node {
     private:
-        // Class variable to store pointer to subscriber for image data
+        // Store pointer to subscriber that receives ZED camera frames
         rclcpp::Subscription<sensor_msgs::msg::Image>::ConstSharedPtr mImageSubscriber;
 
-        // Class variable to aruco tag detection dictionary
+        // Pointer to store ArUco dictionary used for marker detection
         cv::Ptr<cv::aruco::Dictionary> mTagDictionary;
 
-        // Class variable that stores the detected corners from detectMarkers()
+        // Vector to store the detected corners in the current frame
         std::vector<std::vector<cv::Point2f>> mTagCorners;
 
-        // Class variable that stores the detected IDs from detectMarkers()
+        // Vector to stores the detected IDs in the current frame
         std::vector<int> mTagIds;
 
-        // Class variable that stores the information all detected tags
+        // Vector to store detected tags and their information
         std::vector<msg::StarterProjectTag> mTags;
 
-        // Class variable to store pointer to publisher for selected tag
+        // Store pointer to publisher for selected tag
         rclcpp::Publisher<msg::StarterProjectTag>::SharedPtr mTagPublisher;
 
     public:
@@ -57,42 +57,41 @@ namespace mrover_autonomy_starter {
         void imageCallback(sensor_msgs::msg::Image::ConstSharedPtr const& imageMessage);
 
         /**
-         *  Given an image, detect ArUco tags, and fill the vector full of output messages.
+         *  Given an image, detect ArUco tags, and fill mTags full of output messages.
          *
-         * @param image Image
-         * @param tags  Output vector of tags
+         * @param image The image from the camera
          */
         void findTagsInImage(cv::Mat const& image);
 
         /**
          * Publish the closest tag
          *
-         * @param tag Selected tag message
+         * @param tag The selected tag message to publish
          */
         void publishTag(msg::StarterProjectTag const& tag);
 
         /**
          *  Given an ArUco tag in pixel space, find a metric for how close we are.
          *
-         * @param image         Access to the raw OpenCV image as a matrix
-         * @param tagCorners    4-tuple of the tag pixel coordinates representing the corners
-         * @return              Closeness metric from rover to the tag (should be between 0 and 1, where 0 is closest, 1 is farthest)
+         * @param image         The raw RGB image
+         * @param tagCorners    4 (x,y) pairs representing the coordinates of each corners
+         * @return              A closeness metric of the tag (should be between 0 and 1, where 0 is closest, 1 is farthest)
          */
         [[nodiscard]] auto getClosenessMetricFromTagCorners(cv::Mat const& image, std::vector<cv::Point2f> const& tagCorners) -> float;
 
         /**
          *  Given an ArUco tag in pixel space, find the approximate center in pixel space
          *
-         * @param tagCorners    4-tuple of tag pixel coordinates representing the corners
-         * @return              2-tuple (x,y) approximate center in pixel space
+         * @param tagCorners    4 (x,y) pairs representing the pixel coordinates of each corner
+         * @return              The (x,y) approximate center of the tag in pixel space
          */
         [[nodiscard]] auto getCenterFromTagCorners(std::vector<cv::Point2f> const& tagCorners) -> std::pair<float, float>;
 
         /**
          *  Select the tag closest to the camera. If there isn't any tags, return a "dummy" tag with ID of -1.
          * 
-         * @param tags          Vector of tags
-         * @return              Center tag
+         * @param tags          Tags detected in the current frame.
+         * @return              The tag with the lowest closeness metric, or a tag with ID -1 if no tags were detected.
          */
         [[nodiscard]] auto selectTag(std::vector<msg::StarterProjectTag> const& tags) -> msg::StarterProjectTag;
     };

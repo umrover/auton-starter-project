@@ -28,8 +28,8 @@ namespace mrover_autonomy_starter {
 
     // Constructor for the perception() node 
     Perception::Perception() : Node("perception") {
-        // Subscriber to the input images from the ZED camera.
-        // Every time a node publishes to /zed/left/image, the lambda callback we passed will be called, effectively calling imageCallback.
+        // Subscriber to the input images from the ZED camera topic with a queue size of 1.
+        // Every time a node publishes to /zed/left/image, our inline lambda callback forwards frames to the imageCallback() method for processing.
         mImageSubscriber = create_subscription<sensor_msgs::msg::Image>("/zed/left/image", 1, [this](sensor_msgs::msg::Image::ConstSharedPtr const& frame) {
             imageCallback(frame);
         });
@@ -39,7 +39,7 @@ namespace mrover_autonomy_starter {
         // TODO: uncomment me!
         // mTagPublisher = create_publisher<msg::StarterProjectTag>("tag", 1);
 
-        // In order for future calls to cv::aruco::detectMarkers to work, we must first get the ArUco dictionary for 4x4 tags with ids from 0-49.
+        // Store the 50 valid 4x4 IDs (0-49) in a class cv::Ptr variable, extending the lifetime of the dictionary beyond this constructor and lets detectMarkers() reuse it every frame without copying it.
         mTagDictionary = cv::makePtr<cv::aruco::Dictionary>(cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50));
     }
 
@@ -62,7 +62,7 @@ namespace mrover_autonomy_starter {
         // You have mTagDictionary, mTagCorners, and mTagIds member variables already defined!
         // You might want to call getCenterFromTagCorners() and getClosenessMetricFromTagCorners() within this function
 
-        mTags.clear(); // Clear old tags in output vector
+        mTags.clear(); // Clear old tags in output vector, since mTags persists across each imageCallback() call as a class variable.
 
         // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
         (void)image;
