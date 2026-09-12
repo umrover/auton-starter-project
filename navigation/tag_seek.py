@@ -43,25 +43,12 @@ class TagSeekState(State):
 
     def on_loop(self, context) -> State:
         # TODO: get the tag's location and properties (HINT: use get_fid_data() from context.env)
-        tag = context.env.get_fid_data()
 
         # TODO: if we don't have a tag (None or -1): go to the FailState after TAG_FAILURE_TOLERANCE iterations (HINT: use cur_failed_detections to keep track of the amount of failures)
-        if tag is None or tag.tag_id == -1:
-            self.cur_failed_detections += 1
 
-            if self.cur_failed_detections >= TAG_FAILURE_TOLERANCE:
-                context.rover.send_drive_stop()
-                return FailState()
-
-            search_command = Twist()
-            search_command.angular.z = SEARCH_ANGULAR_SPEED
-            context.rover.send_drive_command(search_command)
-            return self
-
-        self.cur_failed_detections = 0
-
-        # Convert the absolute pixel coordinate from perception into a signed,
-        # width-normalized offset: negative is left and positive is right.
+        # Find how far the tag is from the camera center, normalized by the total width 
+        # (negative = left). This allows us to check if we are centered on the target 
+        # and within the required closeness threshold.
         horizontal_error = (
             tag.x_tag_center_pixel - CAMERA_CENTER_X_PIXELS
         ) / CAMERA_WIDTH_PIXELS
@@ -69,26 +56,9 @@ class TagSeekState(State):
         is_close_enough = tag.closeness_metric < CLOSENESS_THRESHOLD
 
         # TODO: if we are within angular and distance tolerances: go to DoneState (HINT: use tag.x_tag_center_pixel and tag.closeness_metric)
-        if is_close_enough and is_centered:
-            context.rover.send_drive_stop()
-            return DoneState()
 
-        # TODO: figure out the Twist command to be applied to move the rover closer to the tag (HINT: Think about how the heading of the rover should be orientated before driving to the tag)
-        twist = Twist()
-
-        if not is_close_enough:
-            twist.linear.x = DRIVE_SPEED
-
-        if not is_centered:
-            if horizontal_error < 0:
-                # Tag is to the left of the image center, so turn left
-                twist.angular.z = TURN_ANGULAR_SPEED 
-            else:
-                # Tag is to the right of the image center, so turn right
-                twist.angular.z = -TURN_ANGULAR_SPEED         
+        # TODO: figure out the Twist command to be applied to move the rover closer to the tag (HINT: Think about how the heading of the rover should be orientated before driving to the tag)        
 
         # TODO: send Twist command to rover
-        context.rover.send_drive_command(twist)
 
         # TODO: stay in the TagSeekState (with outcome "working")
-        return self
