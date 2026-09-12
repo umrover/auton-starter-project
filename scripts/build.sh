@@ -22,8 +22,7 @@ if ! command -v colcon > /dev/null 2>&1; then
     exit 1
 fi
 
-# Build in place: the repo root is the workspace root.
-cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.."
+pushd ../..
 
 export CC=clang
 export CXX=clang++
