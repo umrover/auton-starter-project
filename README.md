@@ -14,7 +14,7 @@ build_mrover
 ## Setup
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/umrover/ros2-autonomy-starter-projects/main/scripts/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/umrover/auton-starter-project/main/scripts/setup.sh | bash
 ```
 
 After it finishes:
