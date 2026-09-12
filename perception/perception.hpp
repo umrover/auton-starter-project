@@ -9,8 +9,8 @@
 #include <vector>
 
 // OpenCV Headers, cv namespace
+#include <opencv2/aruco.hpp>
 #include <opencv2/core/mat.hpp>
-#include <opencv2/objdetect/aruco_detector.hpp>
 
 // ROS Headers, ros namespace
 # include <rclcpp/rclcpp.hpp>
@@ -31,8 +31,8 @@ namespace mrover_autonomy_starter {
         // Store pointer to subscriber that receives ZED camera frames
         rclcpp::Subscription<sensor_msgs::msg::Image>::ConstSharedPtr mImageSubscriber;
 
-        // Detector holding the ArUco dictionary used for marker detection, constructed once and reused every frame
-        cv::aruco::ArucoDetector mTagDetector;
+        // Pointer to store ArUco dictionary used for marker detection
+        cv::Ptr<cv::aruco::Dictionary> mTagDictionary;
 
         // Vector to store the detected corners in the current frame
         std::vector<std::vector<cv::Point2f>> mTagCorners;
