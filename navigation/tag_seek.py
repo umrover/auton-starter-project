@@ -46,12 +46,13 @@ class TagSeekState(State):
 
         # TODO: if we don't have a tag (None or -1): go to the FailState after TAG_FAILURE_TOLERANCE iterations (HINT: use cur_failed_detections to keep track of the amount of failures)
 
-        # Find how far the tag is from the camera center, normalized by the total width 
-        # (negative = left). This allows us to check if we are centered on the target 
-        # and within the required closeness threshold.
+        # Calculate the tag's offset as a fraction of the screen width 
+        # (0 = dead center, -0.1 = 10% to the left, +0.1 = 10% to the right). 
+        # We use this to check if we are aimed straight at the tag on the camera image and close enough.
         horizontal_error = (
             tag.x_tag_center_pixel - CAMERA_CENTER_X_PIXELS
         ) / CAMERA_WIDTH_PIXELS
+
         is_centered = abs(horizontal_error) < CENTERING_TOLERANCE
         is_close_enough = tag.closeness_metric < CLOSENESS_THRESHOLD
 
