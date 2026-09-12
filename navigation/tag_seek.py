@@ -60,8 +60,9 @@ class TagSeekState(State):
 
         self.cur_failed_detections = 0
 
-        # Convert the absolute pixel coordinate from perception into a signed,
-        # width-normalized offset: negative is left and positive is right.
+        # Find how far the tag is from the camera center, normalized by the total width 
+        # (negative = left). This allows us to check if we are centered on the target 
+        # and within the required closeness threshold.
         horizontal_error = (
             tag.x_tag_center_pixel - CAMERA_CENTER_X_PIXELS
         ) / CAMERA_WIDTH_PIXELS
