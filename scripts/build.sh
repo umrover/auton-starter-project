@@ -32,6 +32,7 @@ colcon build \
     --cmake-args -G Ninja -Wno-dev -DCMAKE_BUILD_TYPE="${build_profile}" \
     --symlink-install \
     --build-base "build/${build_profile}" \
-    --install-base "install/${build_profile}"
+    --install-base "install/${build_profile}" \
+    --packages-select mrover_autonomy_starter
 
 ln -sf "build/${build_profile}/compile_commands.json" compile_commands.json
