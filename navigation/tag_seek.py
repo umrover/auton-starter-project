@@ -54,7 +54,7 @@ class TagSeekState(State):
                 return FailState()
 
             search_command = Twist()
-            search_command.angular.z = -SEARCH_ANGULAR_SPEED
+            search_command.angular.z = SEARCH_ANGULAR_SPEED
             context.rover.send_drive_command(search_command)
             return self
 
