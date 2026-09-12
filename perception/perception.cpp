@@ -7,11 +7,12 @@
 #include <limits>
 #include <memory>
 #include <numeric>
+#include <opencv2/aruco.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
+#include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/objdetect/aruco_detector.hpp>
 
 auto main(int argc, char** argv) -> int {
     rclcpp::init(argc, argv);
@@ -26,10 +27,7 @@ auto main(int argc, char** argv) -> int {
 namespace mrover_autonomy_starter {
 
     // Constructor for the perception() node
-    Perception::Perception() : Node("perception"),
-        // Build the detector once with the 50 valid 4x4 IDs (0-49), so every frame reuses the same dictionary instead of rebuilding it
-        mTagDetector{cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50)} {
-
+    Perception::Perception() : Node("perception") {
         // Subscriber to the input images from the ZED camera topic with a queue size of 1.
         // Every time a node publishes to /zed/left/image, our inline lambda callback forwards frames to the imageCallback() method for processing.
         mImageSubscriber = create_subscription<sensor_msgs::msg::Image>("/zed/left/image", 1, [this](sensor_msgs::msg::Image::ConstSharedPtr const& frame) {
@@ -40,6 +38,10 @@ namespace mrover_autonomy_starter {
         // See: http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28c%2B%2B%29
         // TODO: uncomment me!
         mTagPublisher = create_publisher<msg::StarterProjectTag>("tag", 1);
+
+        // Store the 50 valid 4x4 IDs (0-49) in a class cv::Ptr variable, extending the lifetime of the dictionary beyond this constructor 
+        // and lets detectMarkers() reuse it every frame without copying it.
+        mTagDictionary = cv::makePtr<cv::aruco::Dictionary>(cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50));
     }
 
     auto Perception::imageCallback(sensor_msgs::msg::Image::ConstSharedPtr const& imageMessage) -> void {
@@ -60,17 +62,17 @@ namespace mrover_autonomy_starter {
     }
 
     auto Perception::findTagsInImage(cv::Mat const& image) -> void { // NOLINT(*-convert-member-functions-to-static)
-        // Take a look at OpenCV's documentation: https://docs.opencv.org/4.13.0/d5/dae/tutorial_aruco_detection.html
-        // You have mTagDetector, mTagCorners, and mTagIds member variables already defined!
+        // Take a look at OpenCV's documentation: https://docs.opencv.org/4.5.0/d5/dae/tutorial_aruco_detection.html
+        // You have mTagDictionary, mTagCorners, and mTagIds member variables already defined!
         // You might want to call getCenterFromTagCorners() and getClosenessMetricFromTagCorners() within this function
 
         mTags.clear(); // Clear old tags in output vector, since mTags persists across each imageCallback() call as a class variable.
 
         // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
         // populate mTagCorners and mTagIds
-
-        mTagDetector.detectMarkers(image, mTagCorners, mTagIds);
-        for (uint i = 0; i < mTagIds.size(); i++){
+        
+        cv::aruco::detectMarkers(image, mTagDictionary, mTagCorners, mTagIds);
+        for (uint i = 0; i < mTagIds.size(); i++) {
             int tagId = mTagIds[i];
             auto tagCenter = getCenterFromTagCorners(mTagCorners[i]);
             auto closenessMetric = getClosenessMetricFromTagCorners(image, mTagCorners[i]);

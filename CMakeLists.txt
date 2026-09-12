@@ -13,11 +13,11 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(
-    OpenCV 4.7 REQUIRED
+    OpenCV 4.6 REQUIRED
     COMPONENTS
         core 
         imgproc
-        objdetect
+        aruco
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
