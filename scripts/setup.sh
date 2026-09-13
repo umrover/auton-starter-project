@@ -18,7 +18,6 @@ readonly NC='\033[0m'
 
 readonly REPO_URL="git@github.com:umrover/auton-starter-project.git"
 readonly REPO_BRANCH="main"
-readonly DEFAULT_INSTALL_PATH="$HOME/auton-starter-project"
 readonly WIKI_URL="https://github.com/umrover/mrover-ros2/wiki/2.-Install-ROS"
 
 on_err() {
@@ -48,6 +47,7 @@ fi
 
 readonly ROS2_WS="${MROVER_ROS2_WS_PATH:-$HOME/ros2_ws}"
 readonly MROVER_PATH="${ROS2_WS}/src/mrover"
+readonly INSTALL_PATH="${ROS2_WS}/src/auton-starter-project"
 
 # ---------------------------------------------------------------------------
 # Step 0: preflight
@@ -103,20 +103,6 @@ echo -e "${BLUE_BOLD}Preflight passed.${NC}"
 
 echo -e "${BLUE_BOLD}== Placing Autonomy Starter Project ==${NC}"
 
-INSTALL_PATH="${OPT_PATH}"
-if [[ -z "${INSTALL_PATH}" && "${HAVE_TTY}" == true ]]; then
-    echo -e -n "Install path [${DEFAULT_INSTALL_PATH}]: " >/dev/tty
-    read -r INSTALL_PATH </dev/tty || INSTALL_PATH=""
-fi
-if [[ -z "${INSTALL_PATH}" ]]; then
-    INSTALL_PATH="${DEFAULT_INSTALL_PATH}"
-fi
-
-# Expand ~ and relative paths to an absolute path.
-INSTALL_PATH="${INSTALL_PATH/#\~/$HOME}"
-if [[ "${INSTALL_PATH}" != /* ]]; then
-    INSTALL_PATH="$(pwd)/${INSTALL_PATH}"
-fi
 readonly INSTALL_PATH
 
 if [[ -e "${INSTALL_PATH}" ]]; then

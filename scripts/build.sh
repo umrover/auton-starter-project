@@ -22,8 +22,7 @@ if ! command -v colcon > /dev/null 2>&1; then
     exit 1
 fi
 
-# Build in place: the repo root is the workspace root.
-cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.."
+pushd ../..
 
 export CC=clang
 export CXX=clang++
@@ -33,6 +32,7 @@ colcon build \
     --cmake-args -G Ninja -Wno-dev -DCMAKE_BUILD_TYPE="${build_profile}" \
     --symlink-install \
     --build-base "build/${build_profile}" \
-    --install-base "install/${build_profile}"
+    --install-base "install/${build_profile}" \
+    --packages-select mrover_autonomy_starter
 
 ln -sf "build/${build_profile}/compile_commands.json" compile_commands.json
