@@ -111,12 +111,14 @@ namespace mrover_autonomy_starter {
     }
 
     auto Perception::getClosenessMetricFromTagCorners(cv::Mat const& image, std::vector<cv::Point2f> const& tagCorners) -> float { // NOLINT(*-convert-member-functions-to-static)
-        // The closeness metric is an approximation that will be used later by navigation to stop "close enough" to a tag.
-        // The closeness metric should be between 0 and 1, where 0 is very close and 1 is far away
-        // Try not overthink, this metric does not have to be perfect, just somewhat correlated to distance away from a tag
-        // Be creative!
-
-        // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
+        // TODO: implement me! Calculate and return a closeness metric for this tag.
+        // The exact calculation is your choice, but it must:
+        //   - return a finite value between 0.0F and 1.0F;
+        //   - produce smaller values for closer/larger-looking tags;
+        //   - produce larger values for farther/smaller-looking tags.
+        //
+        // HINT: A nearby tag generally occupies more pixels in the image. Consider using the both image and tag dimensions.
+        // Read the function header in perception.hpp for more hints.
 
         // find the area of the tag, and divide by the total area of the image
         // tagCorners 0: top left, 1: top right, 2: bottom right, 3: bottom left

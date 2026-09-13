@@ -39,13 +39,13 @@ class Navigation(Node):
         # DoneState and its transitions
         self.state_machine.add_transitions(
             DoneState(),
-            [DoneState()],
+            [DoneState()]
         )
 
         # FailState and its transitions
         self.state_machine.add_transitions(
             FailState(),
-            [FailState(), TagSeekState()],
+            [FailState()]
         )
 
         # TODO: add TagSeekState and its transitions here
