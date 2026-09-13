@@ -17,13 +17,19 @@ CAMERA_CENTER_X_PIXELS = CAMERA_WIDTH_PIXELS / 2.0
 # The rover will drive forward while the tag is within this tolerance, and will turn in place if the tag is outside of this tolerance.
 CENTERING_TOLERANCE = 0.05
 
-# The old closeness metric was 1 - area_ratio and used a threshold of 0.995,
-# equivalent to a tag occupying 0.5% of the image. The new perception metric is
-# 1 - sqrt(area_ratio), so the equivalent threshold is about 0.929.
-CLOSENESS_THRESHOLD = 0.93
+# You defined how closeness_metric is calculated in Perception. So you know it must produce a value from 0.0 to 1.0, where smaller values mean the tag is closer.
+# Calibrate your threshold value by observing the topic /tag when the rover is at the desired stopping distance.
+CLOSENESS_THRESHOLD = 0.93  # TODO: Tune for your perception implementation.
 
+# --- Movement Speeds ---
+# SEARCH_ANGULAR_SPEED: How fast the rover spins in place when the tag is completely lost. It is relatively fast to scan the area quickly.
 SEARCH_ANGULAR_SPEED = 0.75
+
+# TURN_ANGULAR_SPEED: How fast the rover turns to center the tag once it is in view. 
+# This is deliberately slower than the search speed to prevent overshooting the target.
 TURN_ANGULAR_SPEED = 0.25
+
+# DRIVE_SPEED: The forward linear speed applied to close the distance to the tag.
 DRIVE_SPEED = 1.0
 
 # Navigation runs at 60 Hz. Allow enough time for a complete search rotation at
@@ -42,24 +48,25 @@ class TagSeekState(State):
         pass
 
     def on_loop(self, context) -> State:
-        # TODO: get the tag's location and properties (HINT: use get_fid_data() from context.env)
+        # TODO: Fetch the tag's location and properties 
+        # (HINT: use get_fid_data() from context.env)
 
-        # TODO: if we don't have a tag (None or -1): go to the FailState after TAG_FAILURE_TOLERANCE iterations (HINT: use cur_failed_detections to keep track of the amount of failures)
+        # TODO: Implement lost-tag behaviour. If a valid tag is not found (None or -1), command the rover to spin in place to search for it. 
+        # (HINT: Track the number of consecutive failed detections, if it exceeds TAG_FAILURE_TOLERANCE, halt the rover and transition to the FailState.)
 
-        # Calculate the tag's offset as a fraction of the screen width 
-        # (0 = dead center, -0.1 = 10% to the left, +0.1 = 10% to the right). 
-        # We use this to check if we are aimed straight at the tag on the camera image and close enough.
-        horizontal_error = (
-            tag.x_tag_center_pixel - CAMERA_CENTER_X_PIXELS
-        ) / CAMERA_WIDTH_PIXELS
+        # TODO: Calculate the tag's horizontal error as a fraction of the total camera width.
+        # (HINT: Use the tag's x-coordinate and the CAMERA_* constants defined above. Expected output: 0.0 is dead center, < 0.0 is left, and > 0.0 is right.)
 
-        is_centered = abs(horizontal_error) < CENTERING_TOLERANCE
-        is_close_enough = tag.closeness_metric < CLOSENESS_THRESHOLD
+        # TODO: Create two boolean variables evaluating the rover's position:
+        # 1. Is the tag centered within our acceptable tolerance?
+        # 2. Is the rover close enough to the target?        
 
-        # TODO: if we are within angular and distance tolerances: go to DoneState (HINT: use tag.x_tag_center_pixel and tag.closeness_metric)
+        # TODO: Handle the success condition. If the tag is both centered and close enough, halt the rover and transition to the DoneState.
 
-        # TODO: figure out the Twist command to be applied to move the rover closer to the tag (HINT: Think about how the heading of the rover should be orientated before driving to the tag)        
+        # TODO: Construct a Twist command to define the rover's drive-to-tag behavior. 
+        # (HINT: Think about the physical movement required: how should the distance and centering booleans influence forward speed versus rotational speed? 
+        # If the rover needs to turn, how do you determine the direction? Use TURN_ANGULAR_SPEED and DRIVE_SPEED)
 
-        # TODO: send Twist command to rover
+        # TODO: Send the Twist command to rover
 
-        # TODO: stay in the TagSeekState (with outcome "working")
+        # TODO: Remain in the current state (TagSeekState)

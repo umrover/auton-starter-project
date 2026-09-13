@@ -55,6 +55,7 @@ namespace mrover_autonomy_starter {
         cv::cvtColor(imageBGRA, image, cv::COLOR_BGRA2BGR);
 
         // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
+        (void)this;
     }
 
     auto Perception::findTagsInImage(cv::Mat const& image) -> void { // NOLINT(*-convert-member-functions-to-static)
@@ -65,28 +66,44 @@ namespace mrover_autonomy_starter {
         mTags.clear(); // Clear old tags in output vector, since mTags persists across each imageCallback() call as a class variable.
 
         // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
+        (void)image;
     }
 
     auto Perception::selectTag(std::vector<msg::StarterProjectTag> const& tags) -> msg::StarterProjectTag { // NOLINT(*-convert-member-functions-to-static)
         // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
         // If there isn't a valid tag, you should return a "dummy" tag with ID -1.
+        (void)tags;
+
+        msg::StarterProjectTag noTag{};
+        noTag.tag_id = -1;
+        return noTag;
     }
 
     auto Perception::publishTag(msg::StarterProjectTag const& tag) -> void {
         // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
+        (void)tag;
     }
 
     auto Perception::getClosenessMetricFromTagCorners(cv::Mat const& image, std::vector<cv::Point2f> const& tagCorners) -> float { // NOLINT(*-convert-member-functions-to-static)
-        // The closeness metric is an approximation that will be used later by navigation to stop "close enough" to a tag.
-        // The closeness metric should be between 0 and 1, where 0 is very close and 1 is far away
-        // Try not overthink, this metric does not have to be perfect, just somewhat correlated to distance away from a tag
-        // Be creative!
+        // TODO: implement me! Calculate and return a closeness metric for this tag.
+        // The exact calculation is your choice, but it must:
+        //   - return a finite value between 0.0F and 1.0F;
+        //   - produce smaller values for closer/larger-looking tags;
+        //   - produce larger values for farther/smaller-looking tags.
+        //
+        // HINT: A nearby tag generally occupies more pixels in the image. Consider using the both image and tag dimensions.
+        // Read the function header in perception.hpp for more hints.
+        (void)image;
+        (void)tagCorners;
 
-        // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
+        return 1.0F;
     }  
 
     auto Perception::getCenterFromTagCorners(std::vector<cv::Point2f> const& tagCorners) -> std::pair<float, float> { // NOLINT(*-convert-member-functions-to-static)
         // TODO: implement me! Read the wiki and the function header in perception.hpp for more hints.
+        (void)tagCorners;
+
+        return {0.0F, 0.0F};
     }
 
 } // namespace mrover_autonomy_starter
