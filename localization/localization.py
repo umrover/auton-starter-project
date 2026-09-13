@@ -20,7 +20,7 @@ class Localization(Node):
     pose: SE3
 
     def __init__(self):
-        super().__init__("localization")
+        super().__init__('localization')
         # create subscribers for GPS and IMU data, linking them to our callback functions
         # TODO
 
@@ -46,7 +46,7 @@ class Localization(Node):
         store that value in `self.pose`, then publish that pose to the TF tree.
         """
         # TODO
-
+        
     @staticmethod
     def spherical_to_cartesian(spherical_coord: np.ndarray, reference_coord: np.ndarray) -> np.ndarray:
         """
@@ -60,7 +60,6 @@ class Localization(Node):
         :returns: the approximated cartesian coordinates in meters, given as a numpy array [x, y, z]
         """
         # TODO
-
 
 def main():
     # initialize the node
