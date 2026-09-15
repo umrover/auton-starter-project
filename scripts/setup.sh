@@ -89,11 +89,14 @@ if [[ "${mrover_built}" != true ]]; then
 fi
 echo -e "${GREEN_BOLD}[ok] mrover build present${NC}"
 
-if [[ ! -x "${MROVER_PATH}/venv/bin/colcon" ]]; then
-    fail "colcon is not present in the mrover venv (${MROVER_PATH}/venv)." "" \
+if [[ -x "${MROVER_PATH}/venv/bin/colcon" ]]; then
+    echo -e "${GREEN_BOLD}[ok] colcon present in the mrover venv${NC}"
+elif [[ -x "${MROVER_PATH}/.pixi/envs/default/bin/colcon" ]]; then
+    echo -e "${GREEN_BOLD}[ok] colcon present in the mrover pixi env${NC}"
+else
+    fail "colcon is not present in the mrover venv or pixi env." "" \
         "Reinstall the mrover dependencies: ${WIKI_URL}"
 fi
-echo -e "${GREEN_BOLD}[ok] colcon present in the mrover venv${NC}"
 
 echo -e "${BLUE_BOLD}Preflight passed.${NC}"
 
