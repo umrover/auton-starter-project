@@ -7,18 +7,11 @@ source_auton_starter_overlay() {
         return 1
     fi
 
+    local starter_dir="$PWD"
     source_mrover_overlay
-
-    local profile="${MROVER_BUILD_PROFILE:-RelWithDebInfo}"
-    local overlay="${AUTON_STARTER_PATH}/install/${profile}/setup.zsh"
-
-    if [ -f "${overlay}" ]; then
-        source "${overlay}" > /dev/null
-    else
-        print -P "%F{green}%BNo overlay for profile ${profile}. Run build_starter%b%f"
-    fi
+    cd "${starter_dir}" || return 1
 }
 
 alias auton_starter="cd \$AUTON_STARTER_PATH && source_auton_starter_overlay"
 alias build_starter="\$AUTON_STARTER_PATH/scripts/build.sh && auton_starter"
-alias clean_starter="rm -rf \$AUTON_STARTER_PATH/build \$AUTON_STARTER_PATH/log \$AUTON_STARTER_PATH/install"
+alias clean_starter="rm -rf \$MROVER_ROS2_WS_PATH/build/*/mrover_autonomy_starter \$MROVER_ROS2_WS_PATH/install/*/mrover_autonomy_starter"
