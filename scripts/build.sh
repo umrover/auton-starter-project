@@ -45,9 +45,11 @@ if [ -n "${PIXI_PROJECT_ROOT:-}" ]; then
         -DCMAKE_PREFIX_PATH="${CONDA_PREFIX}" \
         "${os_cmake_args[@]}" \
         --symlink-install \
+        --build-base "build/${build_profile}" \
+        --install-base "install/${build_profile}" \
         --packages-select mrover_autonomy_starter
 
-    ln -sf "$(pwd)/build/mrover_autonomy_starter/compile_commands.json" "${STARTER_PATH}/compile_commands.json"
+    ln -sf "$(pwd)/build/${build_profile}/mrover_autonomy_starter/compile_commands.json" "${STARTER_PATH}/compile_commands.json"
 else
     # native environment
     export CC=clang
