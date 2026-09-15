@@ -17,22 +17,51 @@ if [[ "$#" -gt 1 ]] || { [[ "$#" -eq 1 ]] && [[ "$1" != "Release" && "$1" != "Re
     exit 1
 fi
 
-if ! command -v colcon > /dev/null 2>&1; then
+if ! command -v colcon >/dev/null 2>&1; then
     echo -e "${RED_BOLD}colcon not found. Run auton_starter first, then build.${NC}"
     exit 1
 fi
 
-pushd ../..
+STARTER_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly STARTER_PATH
 
-export CC=clang
-export CXX=clang++
+pushd "${STARTER_PATH}/../.."
 
-colcon build \
-    --event-handlers console_direct+ \
-    --cmake-args -G Ninja -Wno-dev -DCMAKE_BUILD_TYPE="${build_profile}" \
-    --symlink-install \
-    --build-base "build/${build_profile}" \
-    --install-base "install/${build_profile}" \
-    --packages-select mrover_autonomy_starter
+if [ -n "${PIXI_PROJECT_ROOT:-}" ]; then
+    # portable environment
+    os_cmake_args=()
+    if [[ "$(uname)" == "Darwin" ]]; then
+        macos_sysroot=$(xcrun --sdk macosx --show-sdk-path)
+        os_cmake_args=("-DCMAKE_OSX_SYSROOT=${macos_sysroot}")
+    else
+        # conda's pkg-config wrapper runs the GCC-only -print-sysroot
+        os_cmake_args=("-DPKG_CONFIG_EXECUTABLE=${CONDA_PREFIX}/bin/pkg-config.bin")
+        os_cmake_args+=("-DCMAKE_C_COMPILER=${CONDA_PREFIX}/bin/clang" "-DCMAKE_CXX_COMPILER=${CONDA_PREFIX}/bin/clang++")
+    fi
 
-ln -sf "build/${build_profile}/compile_commands.json" compile_commands.json
+    colcon build \
+        --event-handlers console_direct+ \
+        --cmake-args -G Ninja -Wno-dev -DCMAKE_BUILD_TYPE="${build_profile}" \
+        -DCMAKE_PREFIX_PATH="${CONDA_PREFIX}" \
+        "${os_cmake_args[@]}" \
+        --symlink-install \
+        --build-base "build/${build_profile}" \
+        --install-base "install/${build_profile}" \
+        --packages-select mrover_autonomy_starter
+
+    ln -sf "$(pwd)/build/${build_profile}/mrover_autonomy_starter/compile_commands.json" "${STARTER_PATH}/compile_commands.json"
+else
+    # native environment
+    export CC=clang
+    export CXX=clang++
+
+    colcon build \
+        --event-handlers console_direct+ \
+        --cmake-args -G Ninja -Wno-dev -DCMAKE_BUILD_TYPE="${build_profile}" \
+        --symlink-install \
+        --build-base "build/${build_profile}" \
+        --install-base "install/${build_profile}" \
+        --packages-select mrover_autonomy_starter
+
+    ln -sf "$(pwd)/build/${build_profile}/mrover_autonomy_starter/compile_commands.json" "${STARTER_PATH}/compile_commands.json"
+fi
