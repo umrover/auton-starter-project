@@ -125,22 +125,27 @@ fi
 
 echo -e "${BLUE_BOLD}== Installing the auton_starter aliases ==${NC}"
 
-readonly CUSTOM_DIR="$HOME/.oh-my-zsh/custom"
-readonly CUSTOM_FILE="${CUSTOM_DIR}/auton-starter.zsh"
+# wire directly into ~/.zshrc to avoid dependence on omz
+readonly ZSHRC_PLAYBOOK="$(mktemp)"
+trap 'rm -f "${ZSHRC_PLAYBOOK}"' EXIT
 
-if [[ -d "$HOME/.oh-my-zsh" ]]; then
-    mkdir -p "${CUSTOM_DIR}"
-    cat >"${CUSTOM_FILE}" <<EOF
-export AUTON_STARTER_PATH="${INSTALL_PATH}"
-source "\$AUTON_STARTER_PATH/scripts/auton_starter.zsh"
-EOF
-    echo -e "${WHITE_BOLD}Wrote ${CUSTOM_FILE}${NC}"
-else
-    echo -e "${WHITE_BOLD}~/.oh-my-zsh not found. Add these two lines to your shell config:${NC}"
-    echo
-    echo -e "${WHITE}export AUTON_STARTER_PATH=\"${INSTALL_PATH}\"${NC}"
-    echo -e "${WHITE}source \"\$AUTON_STARTER_PATH/scripts/auton_starter.zsh\"${NC}"
-fi
+cat >"${ZSHRC_PLAYBOOK}" <<YAML
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Wire auton-starter aliases into zshrc
+      ansible.builtin.blockinfile:
+        path: "${HOME}/.zshrc"
+        create: true
+        marker: "# {mark} AUTON-STARTER (delete this block to uninstall)"
+        block: |
+          export AUTON_STARTER_PATH="${INSTALL_PATH}"
+          source "\$AUTON_STARTER_PATH/scripts/auton_starter.zsh"
+YAML
+
+ansible-playbook "${ZSHRC_PLAYBOOK}"
+echo -e "${WHITE_BOLD}Wired ~/.zshrc to source the auton-starter aliases${NC}"
 
 # ---------------------------------------------------------------------------
 # Step 3: report
